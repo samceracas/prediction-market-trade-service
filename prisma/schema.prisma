@@ -1,0 +1,87 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum TradeType {
+  BUY
+  SELL
+}
+
+model Trade {
+  id              String    @id @default(uuid())
+  market_id       String
+  user_id         String
+  asset_id        String
+  quantity        Int
+  amount          Float // this depends on the type, if BUY then this was the amount paid by the user. If sell, then this is the amount refunded to the user
+  type            TradeType
+  prices_snapshot Json? // implied price per asset_id right after this trade, e.g. { "asset-1": 0.62, "asset-2": 0.38 } - used to draw the price-over-time chart without replaying LMSR history. Null for trades recorded before this field existed.
+  created_at      DateTime  @default(now())
+  updated_at      DateTime? @updatedAt
+  deleted_at      DateTime?
+}
+
+
+// Market & Event service tables (local copy)
+
+enum AssetType {
+  CHOICE
+  // add other betting markets here
+}
+
+enum EventStatus {
+  CLOSED
+  OPEN
+}
+
+enum MarketStatus {
+  OPEN
+  SUSPENDED // market is closed, all is refunded with their balance (if refundable)
+  RESOLVED // market is closed, everyone is paid out
+}
+
+model Event {
+  id         String      @id @default(uuid())
+  name       String
+  markets    Market[]
+  status     EventStatus @default(OPEN)
+  created_at DateTime    @default(now())
+  updated_at DateTime?   @updatedAt()
+  deleted_at DateTime?
+}
+
+model Market {
+  id             String       @id @default(uuid())
+  name           String
+  header         String
+  status         MarketStatus @default(OPEN)
+  asset_type     AssetType
+  liquidity_b    Float        @default(10)
+  event          Event?       @relation(fields: [event_id], references: [id])
+  event_id       String?
+  assets_options Asset[]
+  created_at     DateTime     @default(now())
+  updated_at     DateTime?    @updatedAt()
+  deleted_at     DateTime?
+}
+
+model Asset {
+  id            String    @id @default(uuid())
+  name          String
+  display_order Int?      @default(autoincrement())
+  market        Market?   @relation(fields: [market_id], references: [id])
+  market_id     String?
+  created_at    DateTime  @default(now())
+  updated_at    DateTime? @updatedAt()
+  deleted_at    DateTime?
+}
