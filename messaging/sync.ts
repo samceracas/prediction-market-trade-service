@@ -87,6 +87,7 @@ export const upsertEventTree = async (event: EventPayload) => {
 // from event-service and upserts it. Run on every RabbitMQ (re)connect so a
 // trade-service restart or a RabbitMQ outage can't leave the shadow copy
 // stale forever, without needing an outbox/poller on the publish side.
+
 export const reconcileFullState = async () => {
   const eventServiceUrl = process.env.EVENT_SERVICE_URL;
 
@@ -96,6 +97,8 @@ export const reconcileFullState = async () => {
   }
 
   try {
+    // This needs a bit of improvement since this doesn't scale that well if the data goes beyond a certain count
+    // Will probably start slowing down starting at 1k+ entries
     const res = await fetch(`${eventServiceUrl}/event/sync/full`);
 
     if (!res.ok) {
