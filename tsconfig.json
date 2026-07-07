@@ -11,8 +11,9 @@
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx",
     "outDir": "./dist",
+    "rootDir": ".",
     "allowImportingTsExtensions": true,
     "rewriteRelativeImportExtensions": true
   },
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "prisma.config.ts"]
 }
