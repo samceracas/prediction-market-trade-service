@@ -169,7 +169,7 @@ work re-writes data that never changed.
 Planned fix: move to an incremental sync, for example a cursor or `updated_at` based
 endpoint that only returns rows changed since the last successful sync, so a reconnect
 only catches up on what actually changed instead of pulling the entire dataset every
-time. Not fixed yet, noting it here so it is a known tradeoff and not a silent gap.
+time. Not fixed yet, but I'am actively working on this project in my free time to implement solutions to this.
 
 `GET /event/sync/full` also has no auth on the event-service side, this service just
 calls it in the open. That was a quick way to get reconciliation working for a
