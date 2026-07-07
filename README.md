@@ -157,6 +157,25 @@ This also covers a RabbitMQ outage. If the broker goes down and comes back,
 trade-service reconnects, and the reconciliation pull runs again and picks up
 anything it missed while disconnected.
 
+## Known limitations
+
+**Reconciliation does not scale past a certain data size.** `GET /event/sync/full`
+returns every event, market, and asset in one unpaginated response, and this service
+pulls and upserts all of it on every boot and every RabbitMQ reconnect. That is fine
+for a small dataset, but once there are thousands of events with their nested markets
+and assets, this call and the upsert that follows it will get slow, and most of that
+work re-writes data that never changed.
+
+Planned fix: move to an incremental sync, for example a cursor or `updated_at` based
+endpoint that only returns rows changed since the last successful sync, so a reconnect
+only catches up on what actually changed instead of pulling the entire dataset every
+time. Not fixed yet, noting it here so it is a known tradeoff and not a silent gap.
+
+`GET /event/sync/full` also has no auth on the event-service side, this service just
+calls it in the open. That was a quick way to get reconciliation working for a
+prototype, not something meant to survive contact with real traffic. See
+event-service's README for the note on that.
+
 ## Endpoints
 
 - `POST /trade/execute` - run the LMSR math and record a trade
