@@ -1,5 +1,5 @@
 {
-  "name": "poly-market-clone-trade-service",
+  "name": "prediction-market-trade-service",
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
